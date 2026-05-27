@@ -18,6 +18,9 @@ jobs:
 
       - name: Create Coverage Report
         run: |
+          REPO="${{ github.repository }}"
+          SHA="${{ github.sha }}"
+
           cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
           # Coverage Report
 
@@ -31,4 +34,7 @@ jobs:
           ## Notes
 
           This is a placeholder report
+
+          ## Link tests
+          [srv/cat-service.cds](https://github.com/${REPO}/blob/${SHA}/srv/cat-service.cds#L3) | 0% |
           EOF
