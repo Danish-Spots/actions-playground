@@ -21,7 +21,7 @@ jobs:
           REPO="${{ github.repository }}"
           SHA="${{ github.sha }}"
 
-          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
           # Coverage Report
 
           | Metric | Coverage | Threshold | Result |
