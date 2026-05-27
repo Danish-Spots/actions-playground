@@ -36,5 +36,5 @@ jobs:
           This is a placeholder report
 
           ## Link tests
-          [srv/cat-service.cds](https://github.com/${REPO}/blob/${SHA}/srv/cat-service.cds#L3) | 0% |
+          [srv/cat-service.cds](https://github.com/$REPO/blob/$SHA/srv/cat-service.cds#L3) | 0% |
           EOF
