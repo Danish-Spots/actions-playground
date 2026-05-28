@@ -36,7 +36,7 @@ jobs:
           
           | Metric | Coverage | Threshold | Result |
           |--------|----------|-----------|--------|
-          | Lines  | 85%      | 80%       | ✅     |
+          | Lines  | 85%      | 89%       | ✅     |
           | Branches| 80%     | 75%       | ✅     |
           | Functions| 90%     | 85%       | ✅     |
           | Statements| 88%     | 80%       | ✅     |
