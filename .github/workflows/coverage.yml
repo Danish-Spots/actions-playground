@@ -178,14 +178,13 @@ jobs:
               return `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/blob/${process.env.GITHUB_SHA}/${filePath}`;
             }
 
-            Object.entries(coverageData)
+            const data = Object.entries(coverageData)
               .filter(([key]) => key !== 'total')
               .map(([file, metrics]) => {
                 const filePath = getFilePath(file);
-                const fileLink = buildFileLink(filePath);
-                const fileText = `[${filePath}](${fileLink})`;
+                
                 return { 
-                  file: fileText,
+                  file: filePath,
                   lines: metrics.lines.pct,
                   branches: metrics.branches.pct,
                   functions: metrics.functions.pct,
@@ -201,11 +200,11 @@ jobs:
 
               | File | Lines | Branches | Functions | Statements |
               |------|-------|----------|-----------|------------|
-              ${Object.entries(coverageData)
-                .filter(([key]) => key !== 'total')
-                .map(([file, metrics]) => {
-                  const filePath = getFilePath(file);
-                  return `| ${filePath} | ${badge(metrics.lines.pct, thresholds.lines)} | ${badge(metrics.branches.pct, thresholds.branches)} | ${badge(metrics.functions.pct, thresholds.functions)} | ${badge(metrics.statements.pct, thresholds.statements)} |`;
+              ${data
+                .map(file => {
+                  const fileLink = buildFileLink(file.file);
+                  const fileText = `[${file.file}](${fileLink})`;
+                  return `| ${file.file} | ${badge(file.lines, thresholds.lines)} | ${badge(file.branches, thresholds.branches)} | ${badge(file.functions, thresholds.functions)} | ${badge(file.statements, thresholds.statements)} |`;
                 })
                 .join('\n')}
             `.replace(/\t/g, '');
