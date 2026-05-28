@@ -14,6 +14,8 @@ jobs:
     name: Coverage Comment in PR
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
     steps:
       - name: Create or update PR comment
         shell: bash
