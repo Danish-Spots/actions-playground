@@ -171,7 +171,7 @@ jobs:
 
             function badge(coverage, threshold) {
               const color = coverage >= threshold ? 'brightgreen' : 'red';
-              return `![${coverage}%](https://img.shields.io/badge/coverage-${coverage}%25-${color})`;
+              return `<span color="${color}">${coverage}%</span>`;
             }
 
             Object.entries(coverageData)
