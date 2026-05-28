@@ -207,6 +207,7 @@ jobs:
                 })
                 .join('\n')}
             `.replace(/\t/g, '');
+            console.log(markdownObject);
 
             fs.writeFileSync('coverage-report.md', markdownObject.trim());
 
