@@ -1,0 +1,26 @@
+{
+    "reporters": [
+        "default",
+        [
+            "jest-junit",
+            {
+                "outputDirectory": "./test-results/jest"
+            }
+        ]
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+        "srv/**/*.js",
+        "!**/node_modules/**",
+        "!**/vendor/**"
+    ],
+    "coverageReporters": [
+        "text",
+        "json-summary",
+        "cobertura"
+    ],
+    "modulePathIgnorePatterns": [
+        "<rootDir>/node_modules/",
+        "./gen"
+    ]
+}

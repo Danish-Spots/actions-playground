@@ -10,13 +10,55 @@ permissions:
   contents: read
 
 jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      code-quality: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: cd bookshop
+        name: Change to bookshop directory
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests and generate coverage
+        run: npm test
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: bookshop/coverage/coverage-summary.json
+          archive: false
+
+      - name: Upload code coverage
+        uses: actions/upload-code-coverage@v1
+        with:
+          file: bookshop/coverage/cobertura
+          language: JavaScript
+          label: Cobertura Coverage Report
+
   coverage-comment:
     name: Coverage Comment in PR
     runs-on: ubuntu-latest
+    needs: run-tests
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
     steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v7
+        with:
+          name: coverage-report
+
       - name: Create or update PR comment
         shell: bash
         env:
@@ -26,14 +68,16 @@ jobs:
           SHA: ${{ github.sha }}
           SUMMARY: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }}"
         run: |
-          marker="<!-- coverage-report -->"
+          marker="<!-- coverage-summary -->"
+
+
 
           bodyFile="$(mktemp)"
 
           cat > "$bodyFile" <<EOF
           $marker
 
-          # Coverage Report
+          # Coverage summary
           
           | Metric | Coverage | Threshold | Result |
           |--------|----------|-----------|--------|
@@ -44,6 +88,7 @@ jobs:
           
           ## Summary
           For a more detailed report click [here]($SUMMARY)
+
           _updated on workflow run: ${GITHUB_RUN_ID}_
           EOF
 
