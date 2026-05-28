@@ -212,4 +212,4 @@ jobs:
           SHA="${{ github.sha }}"
           SUMMARY="coverage-report.md"
 
-          $GITHUB_STEP_SUMMARY = "$SUMMARY"
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
