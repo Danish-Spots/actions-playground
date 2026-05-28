@@ -182,8 +182,10 @@ jobs:
               .filter(([key]) => key !== 'total')
               .map(([file, metrics]) => {
                 const filePath = getFilePath(file);
+                const fileLink = buildFileLink(filePath);
+                const fileText = `[${filePath}](${fileLink})`;
                 return { 
-                  file: `[${filePath}](${buildFileLink(filePath)})`,
+                  file: fileText,
                   lines: metrics.lines.pct,
                   branches: metrics.branches.pct,
                   functions: metrics.functions.pct,
