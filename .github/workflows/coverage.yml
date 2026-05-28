@@ -204,25 +204,12 @@ jobs:
                 .join('\n')}
             `.replace(/\t/g, '');
 
+            fs.writeFileSync('coverage-report.md', markdownObject.trim());
+
       - name: Create Coverage Report
         run: |
           REPO="${{ github.repository }}"
           SHA="${{ github.sha }}"
+          SUMMARY="coverage-report.md"
 
-          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-          # Coverage Report
-
-          | Metric | Coverage | Threshold | Result |
-          |--------|----------|-----------|--------|
-          | Lines  | 85%      | 80%       | ✅     |
-          | Branches| 80%     | 75%       | ✅     |
-          | Functions| 90%     | 85%       | ✅     |
-          | Statements| 88%     | 80%       | ✅     |
-
-          ## Notes
-
-          This is a placeholder report
-
-          ## Link tests
-          [srv/cat-service.cds](https://github.com/$REPO/blob/$SHA/bookshop/srv/cat-service.cds#L3) | 0% |
-          EOF
+          $GITHUB_STEP_SUMMARY = "$SUMMARY"
