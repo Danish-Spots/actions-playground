@@ -41,12 +41,13 @@ jobs:
           path: bookshop/coverage/coverage-summary.json
           archive: false
 
-      - name: Upload code coverage
-        uses: actions/upload-code-coverage@v1
-        with:
-          file: bookshop/coverage/cobertura-coverage.xml
-          language: JavaScript
-          label: Cobertura Coverage Report
+      # Below is only available for Team and Enterprise plans.
+      # - name: Upload code coverage
+      #   uses: actions/upload-code-coverage@v1
+      #   with:
+      #     file: bookshop/coverage/cobertura-coverage.xml
+      #     language: JavaScript
+      #     label: Cobertura Coverage Report
 
   coverage-comment:
     name: Coverage Comment in PR
@@ -60,6 +61,23 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: coverage-report
+
+      - name: Create coverage bodyfile
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const coverageData = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8'));
+
+            const lines = coverageData.total.lines.pct;
+            const branches = coverageData.total.branches.pct;
+            const functions = coverageData.total.functions.pct;
+            const statements = coverageData.total.statements.pct;
+
+            console.log(`Lines: ${lines}%`);
+            console.log(`Branches: ${branches}%`);
+            console.log(`Functions: ${functions}%`);
+            console.log(`Statements: ${statements}%`);
 
       - name: Create or update PR comment
         shell: bash
