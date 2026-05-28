@@ -60,7 +60,7 @@ jobs:
       - name: Download coverage report
         uses: actions/download-artifact@v7
         with:
-          name: coverage-report
+          name: coverage-summary.json
 
       - name: Create coverage bodyfile
         uses: actions/github-script@v9
