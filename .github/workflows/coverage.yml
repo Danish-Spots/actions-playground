@@ -27,14 +27,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        with:
-          working-directory: bookshop
+        working-directory: bookshop
 
 
       - name: Run tests and generate coverage
         run: npm test
-        with: 
-          working-directory: bookshop
+        working-directory: bookshop
       
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
