@@ -74,10 +74,20 @@ jobs:
             const functions = coverageData.total.functions.pct;
             const statements = coverageData.total.statements.pct;
 
-            console.log(`Lines: ${lines}%`);
-            console.log(`Branches: ${branches}%`);
-            console.log(`Functions: ${functions}%`);
-            console.log(`Statements: ${statements}%`);
+            const markdownFile = `
+              <!-- coverage-summary -->
+
+              # Coverage Summary
+
+              | Metric | Coverage | Threshold | Result |
+              |--------|----------|-----------|--------|
+              | Lines  | ${lines}      | 0%       | ✅     |
+              | Branches| ${branches}     | 0%       | ✅     |
+              | Functions| ${functions}     | 0%       | ✅     |
+              | Statements| ${statements}     | 0%       | ✅     |
+            `.replace(/\t/g, '');
+
+            fs.writeFileSync('coverage-body.md', markdownFile.trim());
 
       - name: Create or update PR comment
         shell: bash
@@ -89,28 +99,7 @@ jobs:
           SUMMARY: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }}"
         run: |
           marker="<!-- coverage-summary -->"
-
-
-
-          bodyFile="$(mktemp)"
-
-          cat > "$bodyFile" <<EOF
-          $marker
-
-          # Coverage summary
-          
-          | Metric | Coverage | Threshold | Result |
-          |--------|----------|-----------|--------|
-          | Lines  | 85%      | 89%       | ✅     |
-          | Branches| 80%     | 75%       | ✅     |
-          | Functions| 90%     | 85%       | ✅     |
-          | Statements| 88%     | 80%       | ✅     |
-          
-          ## Summary
-          For a more detailed report click [here]($SUMMARY)
-
-          _updated on workflow run: ${GITHUB_RUN_ID}_
-          EOF
+          bodyFile="coverage-body.md"
 
           commentID="$(
             gh api \
