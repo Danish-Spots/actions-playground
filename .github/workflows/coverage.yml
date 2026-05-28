@@ -24,13 +24,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - run: cd bookshop
-        name: Change to bookshop directory
+
       - name: Install dependencies
         run: npm install
+        working-directory: bookshop
+
 
       - name: Run tests and generate coverage
         run: npm test
+        working-directory: bookshop
       
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
