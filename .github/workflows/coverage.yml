@@ -74,6 +74,13 @@ jobs:
             const functions = coverageData.total.functions.pct;
             const statements = coverageData.total.statements.pct;
 
+            const thresholds = {
+              lines: 80,
+              branches: 75,
+              functions: 85,
+              statements: 80
+            };
+
             const markdownFile = `
               <!-- coverage-summary -->
 
@@ -81,10 +88,10 @@ jobs:
 
               | Metric | Coverage | Threshold | Result |
               |--------|----------|-----------|--------|
-              | Lines  | ${lines}      | 0%       | ✅     |
-              | Branches| ${branches}     | 0%       | ✅     |
-              | Functions| ${functions}     | 0%       | ✅     |
-              | Statements| ${statements}     | 0%       | ✅     |
+              | Lines  | ${lines}      | ${thresholds.lines}%       | ${lines >= thresholds.lines ? '✅' : '❌'}     |
+              | Branches| ${branches}     | ${thresholds.branches}%       | ${branches >= thresholds.branches ? '✅' : '❌'}     |
+              | Functions| ${functions}     | ${thresholds.functions}%       | ${functions >= thresholds.functions ? '✅' : '❌'}     |
+              | Statements| ${statements}     | ${thresholds.statements}%       | ${statements >= thresholds.statements ? '✅' : '❌'}     |
             `.replace(/\t/g, '');
 
             fs.writeFileSync('coverage-body.md', markdownFile.trim());
