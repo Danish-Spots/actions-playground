@@ -10,6 +10,68 @@ permissions:
   contents: read
 
 jobs:
+  coverage-comment:
+    name: Coverage Comment in PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Create or update PR comment
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.sha }}
+        run: |
+          marker="<!-- coverage-report -->"
+
+          bodyFile="$(mktemp)"
+
+          cat > "$bodyFile" <<EOF
+          $marker
+
+          # Coverage Report
+          
+          | Metric | Coverage | Threshold | Result |
+          |--------|----------|-----------|--------|
+          | Lines  | 85%      | 80%       | ✅     |
+          | Branches| 80%     | 75%       | ✅     |
+          | Functions| 90%     | 85%       | ✅     |
+          | Statements| 88%     | 80%       | ✅     |
+          
+          ## Notes
+          This is a placeholder report
+
+          ## Link tests
+          [srv/cat-service.cds](https://github.com/$REPO/blob/$SHA/bookshop/srv/cat-service.cds#L3)
+
+          _updated on workflow run: ${GITHUB_RUN_ID}_
+          EOF
+
+          commentID="$(
+            gh api \
+              -X GET \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/$PR_NUMBER/comments" \
+              --jq "map(select(.body | contains(\"$marker\"))) | .[0].id"
+          )"
+
+          if [[ -n "$commentID" && "$commentID" != "null" ]]; then
+            echo "Updating existing comment ID: $commentID"
+            gh api \
+              -X PATCH \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/comments/$commentID" \
+              -f body="$(cat "$bodyFile")"
+          else
+            echo "Creating new comment"
+            gh api \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/$PR_NUMBER/comments" \
+              -f body="$(cat "$bodyFile")"
+          fi
+
   coverage:
     runs-on: ubuntu-latest
     steps:
