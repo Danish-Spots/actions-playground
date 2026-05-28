@@ -94,7 +94,7 @@ jobs:
               | Statements| ${statements}     | ${thresholds.statements}%       | ${statements >= thresholds.statements ? '✅' : '❌'}     |
             
               ## Link to detailed report
-              [View Full Coverage Report](${{ github.server_url }}${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }})
+              [View Full Coverage Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }})
             `.replace(/\t/g, '');
 
             fs.writeFileSync('coverage-body.md', markdownFile.trim());
