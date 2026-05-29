@@ -77,7 +77,7 @@ jobs:
 
           $xml = [xml](Get-Content $xmlPath)
           $testCases = $xml.testsuites.testsuite.testcase
-
+          $fence = '````'
           $summary = @"
             # Test Summary
             
@@ -91,7 +91,7 @@ jobs:
             $status = if ($testCase.failure) { 'Failed' } else { 'Passed' }
             if ($testCase.failure) {
               $failureMessage = $testCase.failure
-              $failureText = '````$failureMessage````'
+              $failureText = "$fence $failureMessage $fence"
             } else {
               $failureText = ""
             }
