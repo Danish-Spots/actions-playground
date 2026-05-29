@@ -204,7 +204,7 @@ jobs:
                 .map(file => {
                   const fileLink = buildFileLink(file.file);
                   const fileText = `[${file.file}](${fileLink})`;
-                  return `| ${file.file} | ${badge(file.lines, thresholds.lines)} | ${badge(file.branches, thresholds.branches)} | ${badge(file.functions, thresholds.functions)} | ${badge(file.statements, thresholds.statements)} |`;
+                  return `| ${fileText} | ${badge(file.lines, thresholds.lines)} | ${badge(file.branches, thresholds.branches)} | ${badge(file.functions, thresholds.functions)} | ${badge(file.statements, thresholds.statements)} |`;
                 })
                 .join('\n')}
             `.replace(/\t/g, '');
