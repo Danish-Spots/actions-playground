@@ -35,6 +35,7 @@ jobs:
         working-directory: bookshop
       
       - name: Upload coverage report
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: coverage-report
@@ -42,6 +43,7 @@ jobs:
           archive: false
 
       - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: test-report
