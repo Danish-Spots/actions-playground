@@ -155,8 +155,8 @@ jobs:
                 .filter(key => typeof test[key] === 'object')
                 .map(key => {
                   const keys = Object.keys(test[key]);
-                  const basicInfo = keys.filter(k => typeof k !== 'object');
-                  const testInfo = keys.filter(k => typeof k === 'object');
+                  const basicInfo = keys.filter(k => typeof test[key][k] !== 'object' || k === 'failure');
+                  const testInfo = keys.filter(k => typeof test[key][k] === 'object');
                   const testDetails = formatTest(test[key], headerLevel + '#');
                   let resultString = "\n" + headerLevel + " " + test[key].name;
                   resultString +=  "\n" + basicInfo.join(' | ').padStart(1, '| ').padEnd(1, ' |');
@@ -164,6 +164,9 @@ jobs:
                   resultString +=  "\n" + basicInfo.map(k => test[key][k]).join(' | ').padStart(1, '| ').padEnd(1, ' |');
                   resultString +=  "\n" + testDetails;
                   
+                  if (test[key].failure) {
+                    resultString += "\n\n**Failure Message:**\n```\n" + test[key].failure + "\n```";
+                  }
                     
 
 
