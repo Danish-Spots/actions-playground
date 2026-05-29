@@ -41,6 +41,13 @@ jobs:
           path: bookshop/coverage/coverage-summary.json
           archive: false
 
+      - name: Upload test report
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-report
+          path: bookshop/test-results/junit.xml
+          archive: false
+
       # Below is only available for Team and Enterprise plans.
       # - name: Upload code coverage
       #   uses: actions/upload-code-coverage@v1
@@ -48,6 +55,55 @@ jobs:
       #     file: bookshop/coverage/cobertura-coverage.xml
       #     language: JavaScript
       #     label: Cobertura Coverage Report
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: run-tests
+    steps:
+      - name: Download test report
+        uses: actions/download-artifact@v8
+        with:
+          name: junit.xml
+
+      - name: Create test summary
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const xml2js = require('xml2js');
+
+            const parser = new DOMParser();
+            const xmlData = fs.readFileSync('junit.xml', 'utf-8');
+            const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
+
+            const testCases = xmlDoc.getElementsByTagName('testcase');
+            let summary = `
+              # Test Summary
+              
+              | Test Case | Status | Time (s) |
+              |-----------|--------|----------|
+            `;
+
+            for (let i = 0; i < testCases.length; i++) {
+              const testCase = testCases[i];
+              const name = testCase.getAttribute('name');
+              const time = testCase.getAttribute('time');
+              const failure = testCase.getElementsByTagName('failure').length > 0;
+              const status = failure ? 'Failed' : 'Passed';
+
+              summary += `| ${name} | ${status} | ${time} |\n`;
+            }
+
+            fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
+
+      - name: Create Test Summary
+        run: |
+          SUMMARY="test-summary.md"
+          
+          echo "$SUMMARY"
+
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
 
   coverage-comment:
     name: Coverage Comment in PR
