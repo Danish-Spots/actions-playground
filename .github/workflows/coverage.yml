@@ -155,7 +155,7 @@ jobs:
                 .filter(key => typeof test[key] === 'object')
                 .map(key => {
                   const keys = Object.keys(test[key]);
-                  const basicInfo = keys.filter(k => typeof test[key][k] !== 'object' || k !== 'failure');
+                  const basicInfo = keys.filter(k => typeof test[key][k] !== 'object' && k !== 'failure');
                   const testInfo = keys.filter(k => typeof test[key][k] === 'object');
                   const testDetails = formatTest(test[key], headerLevel + '#');
                   let resultString = "\n" + headerLevel + " " + test[key].name;
