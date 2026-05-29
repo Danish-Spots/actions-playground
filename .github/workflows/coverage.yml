@@ -135,9 +135,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const topLevelKeys = ["name", "tests", "failures", "errors", "time", "timestamp", "tests"];
             const testData = JSON.parse(fs.readFileSync('test-summary.json', 'utf-8'));
-            console.log(testData);
 
             const testResults = testData["jest tests"];
 
@@ -151,36 +149,33 @@ jobs:
               ## Test Suites
 
             `;
-            Object.keys(testData)
-              .filter(key => !topLevelKeys.includes(key))
-              .map(key => {
-                const suite = testData[key];
-                let suitString = `
-                  ### ${suite.name}
 
-                  | Name | Tests | Failures | Errors | Time |
-                  |------|-------|----------|--------|------|
-                  | ${suite.name} | ${suite.tests} | ${suite.failures} | ${suite.errors} | ${suite.time}s |
-                `;
+            function formatTest(test, headerLevel) {
+              return Object.keys(test)
+                .filter(key => typeof test[key] === 'object')
+                .map(key => {
+                  const keys = Object.keys(test[key]);
+                  const basicInfo = keys.filter(k => typeof k !== 'object');
+                  const testInfo = keys.filter(k => typeof k === 'object');
+                  const testDetails = formatTest(test[key], headerLevel + '#');
+                  let resultString = `
+                    ${headerLevel} ${test[key].name}
+                    
+                    ${basicInfo.join(' | ').padStart(1, '| ').padEnd(1, ' |')}
+                    ${basicInfo.map(k => '---').join(' | ').padStart(1, '| ').padEnd(1, ' |')}
+                    ${basicInfo.map(k => test[key][k]).join(' | ').padStart(1, '| ').padEnd(1, ' |')}
 
-                Object.keys(suite)
-                  .filter(key => !topLevelKeys.includes(key))
-                  .forEach(testKey => {
-                    const test = suite[testKey];
-                    suitString += `
-                      #### ${test.classname} - ${test.name}
+                    ${testDetails}
+                  `
 
-                      Time: ${test.time}s
-
-                      ${test.failure ? `Failure Message: ${test.failure}` : 'Test passed successfully.'}
-                    `;
-                  });
-
-                return suitString;
-              }).forEach(suiteString => {
-                summary += suiteString;
-              });        
+                  return resultString;
+                });
+            }
+            formatTest(testResults, '###').forEach(suiteString => {
+              summary += suiteString;
+            });
             fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
+
 
 
 
