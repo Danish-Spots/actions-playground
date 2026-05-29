@@ -135,12 +135,58 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-
+            const topLevelKeys = ["name", "tests", "failures", "errors", "time", "timestamp", "tests"];
             const testData = JSON.parse(fs.readFileSync('test-summary.json', 'utf-8'));
             console.log(testData);
+
+            const testResults = testData["jest tests"];
+
+            const summary = `
+              # Test Summary
+
+              | Name | Tests | Failures | Errors | Time |
+              |------|-------|----------|--------|------|
+              | ${testResults.name} | ${testResults.tests} | ${testResults.failures} | ${testResults.errors} | ${testResults.time}s |
+
+              ## Test Suites
+
+              ${Object.keys(testData)
+                .filter(key => !topLevelKeys.includes(key))
+                .map(key => {
+                  const suite = testData[key];
+                  let suitString = `
+                    ### ${suite.name}
+
+                    | Name | Tests | Failures | Errors | Time |
+                    |------|-------|----------|--------|------|
+                    | ${suite.name} | ${suite.tests} | ${suite.failures} | ${suite.errors} | ${suite.time}s |
+                  `;
+
+                  Object.keys(suite)
+                    .filter(key => !topLevelKeys.includes(key))
+                    .forEach(testKey => {
+                      const test = suite[testKey];
+                      suitString += `
+                        #### ${test.classname} - ${test.name}
+
+                        Time: ${test.time}s
+
+                        ${test.failure ? `Failure Message: ${test.failure}` : 'Test passed successfully.'}
+                      `;
+                    });
+
+                  return suitString;
+                })
+              }              
+            `;
+            fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
+
+
+
+              
             
 
-      - name: Create Test Summary
+      - name: Attach Test Summary
         run: |
           SUMMARY="test-summary.md"
           
