@@ -93,7 +93,7 @@ jobs:
               $failureMessage = $testCase.failure.message
               $failureText = "`$failureMessage`"
             } else {
-              $failureText = ''
+              $failureText = ""
             }
             $summary += [Environment]::NewLine + "| $name | $status | $time | $failureText |"
           }
