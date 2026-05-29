@@ -95,10 +95,10 @@ jobs:
             } else {
               $failureText = ''
             }
-            $summary += "`n| $name | $status | $time | $failureText |"
+            $summary += [Environment]::NewLine + "| $name | $status | $time | $failureText |"
           }
 
-          Set-Content -Path $summaryFile -Value ($summary -replace "`t", '').Trim()
+          Set-Content -Path $summaryFile -Value ($summary -replace ([char]9), '').Trim()
 
       # - name: Create test summary
       #   uses: actions/github-script@v9
