@@ -73,7 +73,7 @@ jobs:
         shell: pwsh
         run: |
           $xml = [xml](Get-Content junit.xml)
-          $json = ConvertTo-Json -Depth 100
+          $json = $xml | ConvertTo-Json -Depth 100
           Set-Content -Path test-summary.json -Value $json
 
       - name: Create test summary
