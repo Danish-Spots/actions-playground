@@ -141,7 +141,7 @@ jobs:
 
             const testResults = testData["jest tests"];
 
-            const summary = `
+            let summary = `
               # Test Summary
 
               | Name | Tests | Failures | Errors | Time |
@@ -150,35 +150,36 @@ jobs:
 
               ## Test Suites
 
-              ${Object.keys(testData)
-                .filter(key => !topLevelKeys.includes(key))
-                .map(key => {
-                  const suite = testData[key];
-                  let suitString = `
-                    ### ${suite.name}
-
-                    | Name | Tests | Failures | Errors | Time |
-                    |------|-------|----------|--------|------|
-                    | ${suite.name} | ${suite.tests} | ${suite.failures} | ${suite.errors} | ${suite.time}s |
-                  `;
-
-                  Object.keys(suite)
-                    .filter(key => !topLevelKeys.includes(key))
-                    .forEach(testKey => {
-                      const test = suite[testKey];
-                      suitString += `
-                        #### ${test.classname} - ${test.name}
-
-                        Time: ${test.time}s
-
-                        ${test.failure ? `Failure Message: ${test.failure}` : 'Test passed successfully.'}
-                      `;
-                    });
-
-                  return suitString;
-                })
-              }              
             `;
+            Object.keys(testData)
+              .filter(key => !topLevelKeys.includes(key))
+              .map(key => {
+                const suite = testData[key];
+                let suitString = `
+                  ### ${suite.name}
+
+                  | Name | Tests | Failures | Errors | Time |
+                  |------|-------|----------|--------|------|
+                  | ${suite.name} | ${suite.tests} | ${suite.failures} | ${suite.errors} | ${suite.time}s |
+                `;
+
+                Object.keys(suite)
+                  .filter(key => !topLevelKeys.includes(key))
+                  .forEach(testKey => {
+                    const test = suite[testKey];
+                    suitString += `
+                      #### ${test.classname} - ${test.name}
+
+                      Time: ${test.time}s
+
+                      ${test.failure ? `Failure Message: ${test.failure}` : 'Test passed successfully.'}
+                    `;
+                  });
+
+                return suitString;
+              }).forEach(suiteString => {
+                summary += suiteString;
+              });        
             fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
 
 
