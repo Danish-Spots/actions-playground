@@ -83,7 +83,6 @@ jobs:
             
             | Test Case | Status | Time (s) | failure |
             |-----------|--------|----------|---------|
-
           "@
 
           foreach ($testCase in $testCases) {
@@ -96,7 +95,7 @@ jobs:
             } else {
               $failureText = ''
             }
-            $summary += "| $name | $status | $time | $failureText |\n"
+            $summary += "`n| $name | $status | $time | $failureText |"
           }
 
           Set-Content -Path $summaryFile -Value ($summary -replace "`t", '').Trim()
