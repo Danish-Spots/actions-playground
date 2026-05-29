@@ -91,7 +91,7 @@ jobs:
             $status = if ($testCase.failure) { 'Failed' } else { 'Passed' }
             if ($testCase.failure) {
               $failureMessage = $testCase.failure.message
-              $failureText = "`$failureMessage`"
+              $failureText = "$failureMessage"
             } else {
               $failureText = ""
             }
