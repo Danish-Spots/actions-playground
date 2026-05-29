@@ -90,8 +90,8 @@ jobs:
             $time = $testCase.time
             $status = if ($testCase.failure) { 'Failed' } else { 'Passed' }
             if ($testCase.failure) {
-              $failureMessage = $testCase.failure.message
-              $failureText = "$failureMessage"
+              $failureMessage = $testCase.failure
+              $failureText = "```$failureMessage```"
             } else {
               $failureText = ""
             }
