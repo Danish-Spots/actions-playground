@@ -158,11 +158,11 @@ jobs:
                   const basicInfo = keys.filter(k => typeof k !== 'object');
                   const testInfo = keys.filter(k => typeof k === 'object');
                   const testDetails = formatTest(test[key], headerLevel + '#');
-                  let resultString = "\n${headerLevel} ${test[key].name}";
-                  resultString =  "\n${basicInfo.join(' | ').padStart(1, '| ').padEnd(1, ' |')}";
-                  resultString =  "\n${basicInfo.map(k => '---').join(' | ').padStart(1, '| ').padEnd(1, ' |')}";
-                  resultString =  "\n${basicInfo.map(k => test[key][k]).join(' | ').padStart(1, '| ').padEnd(1, ' |')}";
-                  resultString =  "\n${testDetails}";
+                  let resultString = "\n" + headerLevel + " " + test[key].name;
+                  resultString =  "\n" + basicInfo.join(' | ').padStart(1, '| ').padEnd(1, ' |');
+                  resultString =  "\n" + basicInfo.map(k => '---').join(' | ').padStart(1, '| ').padEnd(1, ' |');
+                  resultString =  "\n" + basicInfo.map(k => test[key][k]).join(' | ').padStart(1, '| ').padEnd(1, ' |');
+                  resultString =  "\n" + testDetails;
                   
                     
 
