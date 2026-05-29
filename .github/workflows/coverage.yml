@@ -69,66 +69,30 @@ jobs:
         with:
           name: junit.xml
 
-      - name: Create test summary
+      - name: Convert XML to JSON
         shell: pwsh
         run: |
-          $summaryFile = "test-summary.md"
-          $xmlPath = "junit.xml"
+          $xml = [xml](Get-Content junit.xml)
+          $json = ConvertTo-Json -Depth 100
+          Set-Content -Path test-summary.json -Value $json
 
-          $xml = [xml](Get-Content $xmlPath)
-          $testCases = $xml.testsuites.testsuite.testcase
-          $fence = '````'
-          $summary = @"
-            # Test Summary
+      - name: Create test summary
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+
+            const testData = JSON.parse(fs.readFileSync('test-summary.json', 'utf-8'));
+            console.log(testData);
+            let summary = `
+              # Test Summary
+
+              | Suite | Tests | Passed | Failed | Skipped |
+              |-------|-------|--------|--------|---------|
+            `
             
-            | Test Case | Status | Time (s) | failure |
-            |-----------|--------|----------|---------|
-          "@
-
-          foreach ($testCase in $testCases) {
-            $name = $testCase.name
-            $time = $testCase.time
-            $status = if ($testCase.failure) { 'Failed' } else { 'Passed' }
-            if ($testCase.failure) {
-              $failureMessage = $testCase.failure
-              $failureText = "$fence $failureMessage $fence"
-            } else {
-              $failureText = ""
-            }
-            $summary += [Environment]::NewLine + "| $name | $status | $time | $failureText |"
-          }
-
-          Set-Content -Path $summaryFile -Value ($summary -replace ([char]9), '').Trim()
-
-      # - name: Create test summary
-      #   uses: actions/github-script@v9
-      #   with:
-      #     script: |
-      #       const fs = require('fs');
-
-      #       const parser = new DOMParser();
-      #       const xmlData = fs.readFileSync('junit.xml', 'utf-8');
-      #       const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
-
-      #       const testCases = xmlDoc.getElementsByTagName('testcase');
-      #       let summary = `
-      #         # Test Summary
               
-      #         | Test Case | Status | Time (s) |
-      #         |-----------|--------|----------|
-      #       `;
-
-      #       for (let i = 0; i < testCases.length; i++) {
-      #         const testCase = testCases[i];
-      #         const name = testCase.getAttribute('name');
-      #         const time = testCase.getAttribute('time');
-      #         const failure = testCase.getElementsByTagName('failure').length > 0;
-      #         const status = failure ? 'Failed' : 'Passed';
-
-      #         summary += `| ${name} | ${status} | ${time} |\n`;
-      #       }
-
-      #       fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
+            # fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
 
       - name: Create Test Summary
         run: |
