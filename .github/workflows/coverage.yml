@@ -90,7 +90,7 @@ jobs:
               $oht
             }
           }
-          $json = $xml | ConvertFrom-Xml | ConvertTo-Json -Depth 3
+          $json = $xml | ConvertFrom-Xml | ConvertTo-Json -Depth 100
           Set-Content -Path test-summary.json -Value $json
 
       - name: Upload converted json
