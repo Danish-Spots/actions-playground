@@ -76,6 +76,12 @@ jobs:
           $json = $xml | ConvertTo-Json -Depth 100
           Set-Content -Path test-summary.json -Value $json
 
+      - name: Upload converted json
+        uses: actions/upload-artifact@v7
+        with:
+          path: test-summary.json
+          archive: false
+
       - name: Create test summary
         uses: actions/github-script@v9
         with:
