@@ -138,15 +138,7 @@ jobs:
 
             const testData = JSON.parse(fs.readFileSync('test-summary.json', 'utf-8'));
             console.log(testData);
-            # let summary = `
-            #   # Test Summary
-
-            #   | Suite | Tests | Passed | Failed | Skipped |
-            #   |-------|-------|--------|--------|---------|
-            # `
             
-              
-            # fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
 
       - name: Create Test Summary
         run: |
