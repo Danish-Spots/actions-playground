@@ -73,24 +73,55 @@ jobs:
         shell: pwsh
         run: |
           $xml = [xml](Get-Content junit.xml)
-          function ConvertFrom-Xml {
-            param([parameter(Mandatory, ValueFromPipeline)] [System.Xml.XmlNode] $node)
-            process {
-              if ($node.DocumentElement) { $node = $node.DocumentElement }
-              $oht = [ordered] @{}
-              $name = $node.Name
-              if ($node.FirstChild -is [system.xml.xmltext]) {
-                $oht.$name = $node.FirstChild.InnerText
-              } else {
-                $oht.$name = New-Object System.Collections.ArrayList 
-                foreach ($child in $node.ChildNodes) {
-                  $null = $oht.$name.Add((ConvertFrom-Xml $child))
-                }
+          
+          function Convert-XmlNodeToObject {
+            param (
+              [System.Xml.XmlNode]$node
+            )
+
+            $object = [ordered]@{}
+
+            if ($node.Attributes) {
+              foreach ($attr in $node.Attributes) {
+                $object[$attr.Name] = $attr.Value
               }
-              $oht
             }
+
+            $elementChildren = @($node.ChildNodes | Where-Object { 
+              $_.NodeType -eq [System.Xml.XmlNodeType]::Element 
+            })
+
+            foreach ($group in ($elementChildren | Group-Object -Property Name)) {
+              $name = $group.Name
+              $children = @($group.Group | ForEach-Object {
+                Convert-XmlNodeToObject -node $_
+              })
+
+              if ($children.Count -eq 1) {
+                $object[$name] = $children[0]
+              } else {
+                $object[$name] = $children
+              }
+            }
+
+            $textChildren = @($node.ChildNodes | Where-Object { 
+              $_.NodeType -eq [System.Xml.XmlNodeType]::Text -or
+              $_.NodeType -eq [System.Xml.XmlNodeType]::CData
+            })
+
+            $text = ($textChildren | ForEach-Object { $_.Value }) -join ''
+
+            if (-not [string]::IsNullOrWhiteSpace($text)) {
+              if ($object.Count -eq 0) {
+                 return $text
+              } 
+              $object['#text'] = $text
+            }
+
+            return [PSCustomObject]$object
           }
-          $json = $xml | ConvertFrom-Xml | ConvertTo-Json -Depth 100
+
+          $json = Convert-XmlNodeToObject -node $xml | ConvertTo-Json -Depth 100
           Set-Content -Path test-summary.json -Value $json
 
       - name: Upload converted json
