@@ -171,6 +171,7 @@ jobs:
                 });
             }
             formatTest(testResults, '###').forEach(suiteString => {
+              console.log(suiteString);
               summary += suiteString;
             });
             fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
