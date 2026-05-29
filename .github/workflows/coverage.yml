@@ -73,7 +73,24 @@ jobs:
         shell: pwsh
         run: |
           $xml = [xml](Get-Content junit.xml)
-          $json = $xml | ConvertTo-Json -Depth 100
+          function ConvertFrom-Xml {
+            param([parameter(Mandatory, ValueFromPipeline)] [System.Xml.XmlNode] $node)
+            process {
+              if ($node.DocumentElement) { $node = $node.DocumentElement }
+              $oht = [ordered] @{}
+              $name = $node.Name
+              if ($node.FirstChild -is [system.xml.xmltext]) {
+                $oht.$name = $node.FirstChild.InnerText
+              } else {
+                $oht.$name = New-Object System.Collections.ArrayList 
+                foreach ($child in $node.ChildNodes) {
+                  $null = $oht.$name.Add((ConvertFrom-Xml $child))
+                }
+              }
+              $oht
+            }
+          }
+          $json = $xml | ConvertFrom-Xml | ConvertTo-Json -Depth 3
           Set-Content -Path test-summary.json -Value $json
 
       - name: Upload converted json
