@@ -12,7 +12,7 @@ describe('CatalogService OData APIs', () => {
         { ID: 2, title: 'Jane Eyre' },
         { ID: 3, title: 'The Raven' },
         { ID: 4, title: 'Eleonora' },
-        { ID: 5, title: 'Catweazle' },
+        { ID: 5, title: 'Catweazlee' },
     ])
   })
 

@@ -78,8 +78,8 @@ jobs:
           $summary = @"
             # Test Summary
             
-            | Test Case | Status | Time (s) |
-            |-----------|--------|----------|
+            | Test Case | Status | Time (s) | failure |
+            |-----------|--------|----------|---------|
 
           "@
 
@@ -87,8 +87,13 @@ jobs:
             $name = $testCase.name
             $time = $testCase.time
             $status = if ($testCase.failure) { 'Failed' } else { 'Passed' }
-
-            $summary += "| $name | $status | $time |`n"
+            if ($testCase.failure) {
+              $failureMessage = $testCase.failure.message
+              $failureText = "`$failureMessage`"
+            } else {
+              $failureText = ''
+            }
+            $summary += "| $name | $status | $time | $failureText |\n"
           }
 
           Set-Content -Path $summaryFile -Value ($summary -replace "`t", '').Trim()
