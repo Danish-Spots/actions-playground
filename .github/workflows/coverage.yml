@@ -86,14 +86,11 @@ jobs:
         with:
           test-results: test-summary.json
           output-file: test-summary.md
-
+      
       - name: Attach Test Summary
-        run: |
-          SUMMARY="test-summary.md"
-          
-          echo "$SUMMARY"
-
-          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+        uses: Danish-Spots/private-action/attach-summary@main
+        with:
+          summary-file: test-summary.md
 
   coverage-comment:
     name: Coverage Comment in PR
