@@ -11,4 +11,4 @@ jobs:
         with:
           who-to-greet: 'DS'
       - name: Get output time
-        run: echo "The time was  $ {{ steps.reuse-action-step.outputs.time }}."
+        run: echo "The time was  ${{ steps.reuse-action-step.outputs.time }}."
