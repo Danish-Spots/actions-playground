@@ -82,59 +82,10 @@ jobs:
           archive: false
 
       - name: Create test summary
-        uses: actions/github-script@v9
+        uses: Danish-Spots/private-action/create-test-summary@main
         with:
-          script: |
-            const fs = require('fs');
-            const testData = JSON.parse(fs.readFileSync('test-summary.json', 'utf-8'));
-
-            const testResults = testData["jest tests"];
-
-            let summary = `
-              # Test Summary
-
-              | Name | Tests | Failures | Errors | Time |
-              |------|-------|----------|--------|------|
-              | ${testResults.name} | ${testResults.tests} | ${testResults.failures} | ${testResults.errors} | ${testResults.time}s |
-
-              ## Test Suites
-
-            `;
-
-            function formatTest(test, headerLevel) {
-              return Object.keys(test)
-                .filter(key => typeof test[key] === 'object')
-                .map(key => {
-                  const keys = Object.keys(test[key]);
-                  const basicInfo = keys.filter(k => typeof test[key][k] !== 'object' && k !== 'failure');
-                  const testInfo = keys.filter(k => typeof test[key][k] === 'object');
-                  const testDetails = formatTest(test[key], headerLevel + '#');
-                  let resultString = "\n" + headerLevel + " " + test[key].name;
-                  resultString +=  "\n" + basicInfo.join(' | ').padStart(1, '| ').padEnd(1, ' |');
-                  resultString +=  "\n" + basicInfo.map(k => '---').join(' | ').padStart(1, '| ').padEnd(1, ' |');
-                  resultString +=  "\n" + basicInfo.map(k => test[key][k]).join(' | ').padStart(1, '| ').padEnd(1, ' |');
-                  resultString +=  "\n" + testDetails;
-                  
-                  if (test[key].failure) {
-                    resultString += "\n\n**Failure Message:**\n```\n" + test[key].failure + "\n```";
-                  }
-                    
-
-
-                  return resultString;
-                });
-            }
-            formatTest(testResults, '###').forEach(suiteString => {
-              console.log(suiteString);
-              summary += suiteString;
-            });
-            fs.writeFileSync('test-summary.md', summary.replace(/\t/g, '').trim());
-
-
-
-
-              
-            
+          test-results: test-summary.json
+          output-file: test-summary.md
 
       - name: Attach Test Summary
         run: |
