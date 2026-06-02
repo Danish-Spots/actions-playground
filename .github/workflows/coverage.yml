@@ -90,7 +90,7 @@ jobs:
       - name: Attach Test Summary
         uses: Danish-Spots/private-action/attach-summary@main
         with:
-          summary-file: test-summary.md
+          md-file: test-summary.md
 
   coverage-comment:
     name: Coverage Comment in PR
