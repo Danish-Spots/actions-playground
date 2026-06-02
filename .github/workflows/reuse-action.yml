@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Reuse custom action
         id: reuse-action-step
-        uses: Danish-Spots/private-action@main
+        uses: Danish-Spots/private-action@v1
         with:
           who-to-greet: 'DS'
       - name: Get output time
