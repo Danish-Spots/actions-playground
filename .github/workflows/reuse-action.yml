@@ -12,3 +12,6 @@ jobs:
           who-to-greet: 'DS'
       - name: Get output time
         run: echo "The time was  ${{ steps.reuse-action-step.outputs.time }}."
+
+      - name: Something to change for commits
+        run: echo "something to change"
