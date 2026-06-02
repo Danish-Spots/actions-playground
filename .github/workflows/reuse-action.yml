@@ -7,6 +7,7 @@ jobs:
     steps:
       - name: Reuse custom action
         id: reuse-action-step
+        # Path is USER/ORG / REPO NAME / FOLDER PATH @ BRANCH, TAG, or COMMIT SHA
         uses: Danish-Spots/private-action/test-action@main
         with:
           who-to-greet: 'DS'

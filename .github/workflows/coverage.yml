@@ -69,61 +69,12 @@ jobs:
         with:
           name: junit.xml
 
-      - name: Convert XML to JSON
-        shell: pwsh
-        run: |
-          $xml = [xml](Get-Content junit.xml)
-          
-          function Convert-XmlNodeToObject {
-            param (
-              [System.Xml.XmlNode]$node
-            )
-
-            $object = [ordered]@{}
-
-            if ($node.Attributes) {
-              foreach ($attr in $node.Attributes) {
-                $object[$attr.Name] = $attr.Value
-              }
-            }
-
-            $elementChildren = @($node.ChildNodes | Where-Object { 
-              $_.NodeType -eq [System.Xml.XmlNodeType]::Element 
-            })
-
-            foreach ($group in ($elementChildren | Group-Object -Property Name)) {
-              $name = $group.Name
-              $children = @($group.Group | ForEach-Object {
-                Convert-XmlNodeToObject -node $_
-              })
-
-              if ($children.Count -eq 1) {
-                $object[$name] = $children[0]
-              } else {
-                $object[$name] = $children
-              }
-            }
-
-            $textChildren = @($node.ChildNodes | Where-Object { 
-              $_.NodeType -eq [System.Xml.XmlNodeType]::Text -or
-              $_.NodeType -eq [System.Xml.XmlNodeType]::CData
-            })
-
-            $text = ($textChildren | ForEach-Object { $_.Value }) -join ''
-
-            if (-not [string]::IsNullOrWhiteSpace($text)) {
-              if ($object.Count -eq 0) {
-                 return $text
-              } 
-              $object['#text'] = $text
-            }
-
-            return [PSCustomObject]$object
-          }
-
-          $json = Convert-XmlNodeToObject -node $xml | ConvertTo-Json -Depth 100
-          Set-Content -Path test-summary.json -Value $json
-
+      - name: Convert junit to json
+        uses: Danish-Spots/private-action/convert-xml-to-json@main
+        with:
+          xml-file: junit.xml
+          json-file: test-summary.json
+      
       - name: Upload converted json
         uses: actions/upload-artifact@v7
         with:
