@@ -106,41 +106,10 @@ jobs:
           name: coverage-summary.json
 
       - name: Create coverage bodyfile
-        uses: actions/github-script@v9
+        uses: Danish-Spots/private-action/create-coverage-bodyfile@main
         with:
-          script: |
-            const fs = require('fs');
-            const coverageData = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8'));
-
-            const lines = coverageData.total.lines.pct;
-            const branches = coverageData.total.branches.pct;
-            const functions = coverageData.total.functions.pct;
-            const statements = coverageData.total.statements.pct;
-
-            const thresholds = {
-              lines: 80,
-              branches: 75,
-              functions: 85,
-              statements: 80
-            };
-
-            const markdownFile = `
-              <!-- coverage-summary -->
-
-              # Coverage Summary
-
-              | Metric | Coverage | Threshold | Result |
-              |--------|----------|-----------|--------|
-              | Lines  | ${lines}      | ${thresholds.lines}%       | ${lines >= thresholds.lines ? '✅' : '❌'}     |
-              | Branches| ${branches}     | ${thresholds.branches}%       | ${branches >= thresholds.branches ? '✅' : '❌'}     |
-              | Functions| ${functions}     | ${thresholds.functions}%       | ${functions >= thresholds.functions ? '✅' : '❌'}     |
-              | Statements| ${statements}     | ${thresholds.statements}%       | ${statements >= thresholds.statements ? '✅' : '❌'}     |
-            
-              ## Link to detailed report
-              [View Full Coverage Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }})
-            `.replace(/\t/g, '');
-
-            fs.writeFileSync('coverage-body.md', markdownFile.trim());
+          coverage-file: coverage-summary.json
+          output-file: coverage-body.md
 
       - name: Create or update PR comment
         shell: bash
