@@ -73,7 +73,7 @@ jobs:
         uses: Danish-Spots/private-action/convert-xml-to-json@main
         with:
           xml-file: junit.xml
-          json-file: test-summary.json
+          output-file: test-summary.json
       
       - name: Upload converted json
         uses: actions/upload-artifact@v7
