@@ -1,0 +1,235 @@
+name: Code Coverage Report
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      code-quality: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: bookshop
+
+
+      - name: Run tests and generate coverage
+        run: npm test
+        working-directory: bookshop
+      
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: bookshop/coverage/coverage-summary.json
+          archive: false
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-report
+          path: bookshop/test-results/jest/junit.xml
+          archive: false
+
+      # Below is only available for Team and Enterprise plans.
+      # - name: Upload code coverage
+      #   uses: actions/upload-code-coverage@v1
+      #   with:
+      #     file: bookshop/coverage/cobertura-coverage.xml
+      #     language: JavaScript
+      #     label: Cobertura Coverage Report
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: run-tests
+    if: always()
+    steps:
+      - name: Download test report
+        uses: actions/download-artifact@v8
+        with:
+          name: junit.xml
+
+      - name: Convert junit to json
+        uses: Danish-Spots/private-action/convert-xml-to-json@main
+        with:
+          xml-file: junit.xml
+          output-file: test-summary.json
+      
+      - name: Upload converted json
+        uses: actions/upload-artifact@v7
+        with:
+          path: test-summary.json
+          archive: false
+
+      - name: Create test summary
+        uses: Danish-Spots/private-action/create-test-summary@main
+        with:
+          test-results: test-summary.json
+          output-file: test-summary.md
+      
+      - name: Attach Test Summary
+        uses: Danish-Spots/private-action/attach-summary@main
+        with:
+          md-file: test-summary.md
+
+  coverage-comment:
+    name: Coverage Comment in PR
+    runs-on: ubuntu-latest
+    needs: run-tests
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v8
+        with:
+          name: coverage-summary.json
+
+      - name: Create coverage bodyfile
+        uses: Danish-Spots/private-action/create-coverage-bodyfile@main
+        with:
+          coverage-file: coverage-summary.json
+          output-file: coverage-body.md
+
+      - name: Create or update PR comment
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.sha }}
+          SUMMARY: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#summary-${{ job.check_run_id }}"
+        run: |
+          marker="<!-- coverage-summary -->"
+          bodyFile="coverage-body.md"
+
+          commentID="$(
+            gh api \
+              -X GET \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/$PR_NUMBER/comments" \
+              --jq "map(select(.body | contains(\"$marker\"))) | .[0].id"
+          )"
+
+          if [[ -n "$commentID" && "$commentID" != "null" ]]; then
+            echo "Updating existing comment ID: $commentID"
+            gh api \
+              -X PATCH \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/comments/$commentID" \
+              -f body="$(cat "$bodyFile")"
+          else
+            echo "Creating new comment"
+            gh api \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/$REPO/issues/$PR_NUMBER/comments" \
+              -f body="$(cat "$bodyFile")"
+          fi
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: run-tests
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v8
+        with:
+          name: coverage-summary.json
+
+      - name: Create coverage file
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const coverageData = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8'));
+            const workspace = process.env.GITHUB_WORKSPACE || '.';
+            const thresholds = {
+              lines: 80,
+              branches: 75,
+              functions: 85,
+              statements: 80
+            };
+
+            function getFilePath(filePath) {
+              if (filePath === 'total') {
+                return filePath;
+              }
+
+              const relativePath = path.relative(workspace, filePath);
+
+              return relativePath;
+            }
+
+            function badge(coverage, threshold) {
+              const color = coverage >= threshold ? 'brightgreen' : 'red';
+              return `<span color="${color}">${coverage}%</span>`;
+            }
+
+            function buildFileLink(filePath) {
+              return `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/blob/${process.env.GITHUB_SHA}/${filePath}`;
+            }
+
+            const data = Object.entries(coverageData)
+              .filter(([key]) => key !== 'total')
+              .map(([file, metrics]) => {
+                const filePath = getFilePath(file);
+                
+                return { 
+                  file: filePath,
+                  lines: metrics.lines.pct,
+                  branches: metrics.branches.pct,
+                  functions: metrics.functions.pct,
+                  statements: metrics.statements.pct,
+                };
+              })
+              .sort((a, b) => a.file.localeCompare(b.file));
+
+            const markdownObject = `
+              <!-- coverage-report -->
+
+              # Coverage Report
+
+              | File | Lines | Branches | Functions | Statements |
+              |------|-------|----------|-----------|------------|
+              ${data
+                .map(file => {
+                  const fileLink = buildFileLink(file.file);
+                  const fileText = `[${file.file}](${fileLink})`;
+                  return `| ${fileText} | ${badge(file.lines, thresholds.lines)} | ${badge(file.branches, thresholds.branches)} | ${badge(file.functions, thresholds.functions)} | ${badge(file.statements, thresholds.statements)} |`;
+                })
+                .join('\n')}
+            `.replace(/\t/g, '');
+            console.log(markdownObject);
+
+            fs.writeFileSync('coverage-report.md', markdownObject.trim());
+
+      - name: Create Coverage Report
+        run: |
+          REPO="${{ github.repository }}"
+          SHA="${{ github.sha }}"
+          SUMMARY="coverage-report.md"
+          
+          echo "$SUMMARY"
+
+          cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"

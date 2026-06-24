@@ -1,0 +1,24 @@
+{
+    "jest tests": {
+        "name": "jest tests",
+        "tests": "1",
+        "failures": "1",
+        "errors": "0",
+        "time": "1.02",
+        "CatalogService OData APIs": {
+            "name": "CatalogService OData APIs",
+            "errors": "0",
+            "failures": "1",
+            "skipped": "0",
+            "timestamp": "2026-05-29T12:27:32",
+            "time": "0.937",
+            "tests": "1",
+            "CatalogService OData APIs serves CatalogService.Books": {
+                "classname": "CatalogService OData APIs serves CatalogService.Books",
+                "name": "CatalogService OData APIs serves CatalogService.Books",
+                "time": "0.069",
+                "failure": "Expected value   undefined\nReceived:\n  undefined\n\nMessage:\n  expected [\n  { ID: 1, title: 'Wuthering Heights' },\n  { ID: 2, title: 'Jane Eyre' },\n  { ID: 3, title: 'The Raven' },\n  { ID: 4, title: 'Eleonora' },\n  { ID: 5, title: 'Catweazle' }\n] to contain subset [\n  { ID: 1, title: 'Wuthering Heights' },\n  { ID: 2, title: 'Jane Eyre' },\n  { ID: 3, title: 'The Raven' },\n  { ID: 4, title: 'Eleonora' },\n  { ID: 5, title: 'Catweazlee' }\n]\n\nDifference:\n\nCompared values have no visual difference.Error: \n    at Object.containSubset (/home/runner/work/actions-playground/actions-playground/bookshop/test/CatalogService.test.js:10:27)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+            }
+        }
+    }
+}
